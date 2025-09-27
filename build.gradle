@@ -1,0 +1,74 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'edu.sc.seis.launch4j' version '3.0.5'
+}
+
+group = 'net.java'
+version = '1.5'
+base {
+    compileJava.options.encoding = compileTestJava.options.encoding = javadoc.options.encoding = "UTF-8"
+}
+launch4j {
+    manifest = "${project.projectDir}/manifest.xml"
+    jarTask = project.tasks.shadowJar
+    outfile = 'faker-' + "${project.version}" + '.exe'
+    headerType = 'gui'
+    productName = 'Faker'
+    mutexName = 'faker_mutex'
+    jreMinVersion = '17'
+    version = "${project.version}"
+    icon = "${project.projectDir}/src/main/resources/assets/faker/icon/icon_64.ico"
+    jvmOptions.add("-Dfile.encoding=UTF-8")
+    downloadUrl = "https://adoptium.net/"
+}
+
+
+repositories {
+    mavenCentral()
+    maven {
+        name "lenni0451MavenReleases"
+        url "https://maven.lenni0451.net/releases"
+    }
+    maven { url 'https://jitpack.io' }
+    maven {
+        name = "Minecraft Libraries"
+        url = "https://libraries.minecraft.net"
+
+        content {
+            includeGroup "com.mojang"
+        }
+    }
+}
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'net.java.faker.Proxy',
+                'SplashScreen-Image': 'assets/faker/icon/splash.png'
+        )
+    }
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'com.formdev:flatlaf:3.5.4'
+    implementation "net.raphimc.netminecraft:all:3.1.2"
+    implementation 'net.raphimc:MinecraftAuth:4.1.1'
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
+    implementation 'com.mojang:authlib:3.16.29'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    //org.apache.directory.server.dhcp.service.manager.DhcpAddressResourceProvider
+    //org.apache.directory.server.dhcp.messages.HardwareAddress
+    //org.anarres.dhcp.common.address.Subnet
+    //doesn't support modern guava
+    implementation('org.anarres.dhcp:dhcp-protocol:1.0.9') {
+        exclude group: 'com.google.guava'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
