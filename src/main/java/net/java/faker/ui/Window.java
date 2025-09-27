@@ -55,6 +55,9 @@ public class Window extends JFrame {
     public static final int BORDER_PADDING = 10;
     public static final int BODY_BLOCK_PADDING = 10;
 
+    private static final String TAB_ARC_PROPERTY = "JTabbedPane.tabArc";
+    private static final String TAB_SELECTION_HEIGHT_PROPERTY = "JTabbedPane.tabSelectionHeight";
+
     private final AnimatedBackgroundPanel backgroundPanel = new AnimatedBackgroundPanel();
     public final JTabbedPane contentPane = new JTabbedPane();
     private final JTextField searchField = new JTextField();
@@ -153,9 +156,9 @@ public class Window extends JFrame {
         contentPane.setBorder(new EmptyBorder(12, 12, 12, 12));
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, "center");
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
-        contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ARC, 20);
+        contentPane.putClientProperty(TAB_ARC_PROPERTY, 20);
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 48);
-        contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_SELECTION_HEIGHT, 4);
+        contentPane.putClientProperty(TAB_SELECTION_HEIGHT_PROPERTY, 4);
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_HAS_FULL_BORDER, false);
         contentPane.setFont(contentPane.getFont().deriveFont(Font.BOLD, 15f));
         contentPane.setForeground(new Color(209, 218, 234));
