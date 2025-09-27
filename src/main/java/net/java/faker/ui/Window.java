@@ -95,9 +95,10 @@ public class Window extends JFrame {
             UIManager.put("Component.arc", 18);
             UIManager.put("Button.arc", 20);
             UIManager.put("TabbedPane.tabArc", 20);
-            UIManager.put("TabbedPane.selectedBackground", new Color(41, 45, 60));
-            Color surface = new Color(34, 37, 48);
-            Color background = new Color(24, 27, 36);
+            UIManager.put("TabbedPane.selectedBackground", new Color(34, 37, 48));
+            Color surface = new Color(30, 32, 40);
+            Color background = new Color(18, 20, 27);
+            Color panelOverlay = new Color(22, 24, 32);
             Color textPrimary = new Color(222, 229, 240);
             UIManager.put("Panel.background", surface);
             UIManager.put("TabbedPane.background", surface);
@@ -105,12 +106,15 @@ public class Window extends JFrame {
             UIManager.put("TabbedPane.unselectedBackground", surface);
             UIManager.put("ScrollPane.background", surface);
             UIManager.put("Viewport.background", surface);
+            UIManager.put("ScrollPane.foreground", textPrimary);
             UIManager.put("Label.foreground", textPrimary);
             UIManager.put("Component.focusColor", accentColor);
             UIManager.put("ComboBox.background", surface);
             UIManager.put("ComboBox.foreground", textPrimary);
             UIManager.put("List.background", background);
             UIManager.put("List.foreground", textPrimary);
+            UIManager.put("TextArea.background", panelOverlay);
+            UIManager.put("TextArea.foreground", textPrimary);
         } catch (Throwable t) {
             Logger.error("Failed set look and feel", t);
         }
@@ -163,8 +167,8 @@ public class Window extends JFrame {
         backgroundPanel.setLayout(new BorderLayout());
         backgroundPanel.setBorder(new EmptyBorder(32, 32, 32, 32));
 
-        JPanel overlay = new JPanel(new BorderLayout(24, 24));
-        overlay.setOpaque(false);
+        JPanel overlay = new GradientPanel(new Color(32, 35, 44, 200), new Color(18, 19, 26, 210), 42, true);
+        overlay.setLayout(new BorderLayout(24, 24));
         overlay.add(createHeaderPanel(), BorderLayout.NORTH);
         overlay.add(createContentPanel(), BorderLayout.CENTER);
 
@@ -173,8 +177,9 @@ public class Window extends JFrame {
     }
 
     private JPanel createHeaderPanel() {
-        JPanel header = new JPanel(new BorderLayout(16, 8));
-        header.setOpaque(false);
+        GradientPanel header = new GradientPanel(new Color(46, 50, 64, 215), new Color(24, 26, 34, 215), 28, false);
+        header.setLayout(new BorderLayout(18, 10));
+        header.setBorder(new EmptyBorder(16, 20, 18, 20));
 
         JPanel titleContainer = new JPanel();
         titleContainer.setOpaque(false);
@@ -192,23 +197,24 @@ public class Window extends JFrame {
         titleContainer.add(Box.createVerticalStrut(6));
         titleContainer.add(subtitle);
 
-        JPanel searchContainer = new JPanel(new BorderLayout());
-        searchContainer.setOpaque(false);
-        searchContainer.setPreferredSize(new Dimension(340, 54));
+        GradientPanel searchContainer = new GradientPanel(new Color(62, 68, 84, 200), new Color(42, 46, 60, 180), 30, true);
+        searchContainer.setLayout(new BorderLayout());
+        searchContainer.setPreferredSize(new Dimension(340, 56));
+        searchContainer.setBorder(new EmptyBorder(6, 8, 6, 8));
 
         searchField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Search features…");
         searchField.putClientProperty(FlatClientProperties.TEXT_FIELD_SHOW_CLEAR_BUTTON, true);
         searchField.setOpaque(false);
-        searchField.setForeground(new Color(220, 228, 238));
+        searchField.setForeground(new Color(232, 236, 245));
         searchField.setCaretColor(accentColor);
         searchField.setFont(searchField.getFont().deriveFont(Font.PLAIN, 16f));
         searchField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(66, 74, 92), 1, true),
-                new EmptyBorder(8, 14, 8, 14)));
+                BorderFactory.createLineBorder(new Color(86, 96, 116, 180), 1, true),
+                new EmptyBorder(10, 16, 10, 16)));
 
         searchContainer.add(searchField, BorderLayout.CENTER);
 
-        searchFeedback.setForeground(new Color(160, 170, 188));
+        searchFeedback.setForeground(new Color(172, 182, 204));
         searchFeedback.setFont(searchFeedback.getFont().deriveFont(Font.PLAIN, 13f));
         searchFeedback.setBorder(new EmptyBorder(6, 2, 0, 0));
         updateSearchFeedback(null, 0);
@@ -381,11 +387,22 @@ public class Window extends JFrame {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             RoundRectangle2D shape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 36, 36);
-            g2.setColor(new Color(29, 32, 46, 220));
+            LinearGradientPaint gradient = new LinearGradientPaint(
+                    new Point2D.Float(0, 0),
+                    new Point2D.Float(0, getHeight()),
+                    new float[]{0f, 0.5f, 1f},
+                    new Color[]{new Color(48, 52, 68, 230), new Color(34, 37, 52, 225), new Color(22, 24, 34, 210)});
+            g2.setPaint(gradient);
             g2.fill(shape);
+
             g2.setStroke(new BasicStroke(1.5f));
-            g2.setColor(new Color(255, 255, 255, 32));
+            g2.setColor(new Color(126, 255, 198, 36));
             g2.draw(shape);
+
+            RoundRectangle2D inner = new RoundRectangle2D.Double(1.5, 1.5, getWidth() - 3, getHeight() - 3, 32, 32);
+            g2.setStroke(new BasicStroke(1f));
+            g2.setColor(new Color(255, 255, 255, 18));
+            g2.draw(inner);
             g2.dispose();
             super.paintComponent(g);
         }
@@ -398,9 +415,9 @@ public class Window extends JFrame {
 
         private AnimatedBackgroundPanel() {
             setOpaque(true);
-            timer = new Timer(40, e -> {
-                hue += 0.0015f;
-                phase += 0.01f;
+            timer = new Timer(25, e -> {
+                hue += 0.0045f;
+                phase += 0.045f;
                 repaint();
             });
             timer.start();
@@ -424,23 +441,69 @@ public class Window extends JFrame {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            Color top = new Color(20, 23, 33);
-            Color bottom = new Color(14, 16, 24);
-            GradientPaint gradient = new GradientPaint(0, 0, top, getWidth(), getHeight(), bottom);
+            Color top = new Color(24, 26, 36);
+            Color bottom = new Color(10, 11, 16);
+            GradientPaint gradient = new GradientPaint(0, 0, top, 0, getHeight(), bottom);
             g2.setPaint(gradient);
             g2.fillRect(0, 0, getWidth(), getHeight());
 
-            float radius = Math.max(getWidth(), getHeight());
-            float cx = (float) (Math.sin(phase) * getWidth() * 0.25 + getWidth() * 0.5);
-            float cy = (float) (Math.cos(phase * 0.8) * getHeight() * 0.25 + getHeight() * 0.5);
-            Color accent = Color.getHSBColor(hue % 1f, 0.45f, 0.45f);
+            float radius = Math.max(getWidth(), getHeight()) * 0.75f;
+            float cx = (float) (Math.sin(phase) * getWidth() * 0.35 + getWidth() * 0.5);
+            float cy = (float) (Math.cos(phase * 0.9) * getHeight() * 0.35 + getHeight() * 0.5);
+            Color accent = Color.getHSBColor(hue % 1f, 0.55f, 0.55f);
             RadialGradientPaint paint = new RadialGradientPaint(new Point2D.Float(cx, cy), radius,
                     new float[]{0f, 1f},
                     new Color[]{new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 110), new Color(0, 0, 0, 0)});
             g2.setPaint(paint);
             g2.fillRect(0, 0, getWidth(), getHeight());
 
+            float cxSecondary = (float) (Math.cos(phase * 0.6) * getWidth() * 0.3 + getWidth() * 0.5);
+            float cySecondary = (float) (Math.sin(phase * 0.7) * getHeight() * 0.3 + getHeight() * 0.4);
+            Color accentSecondary = Color.getHSBColor((hue + 0.18f) % 1f, 0.45f, 0.4f);
+            RadialGradientPaint secondaryPaint = new RadialGradientPaint(new Point2D.Float(cxSecondary, cySecondary), radius * 0.8f,
+                    new float[]{0f, 1f},
+                    new Color[]{new Color(accentSecondary.getRed(), accentSecondary.getGreen(), accentSecondary.getBlue(), 80), new Color(0, 0, 0, 0)});
+            g2.setPaint(secondaryPaint);
+            g2.fillRect(0, 0, getWidth(), getHeight());
+
             g2.dispose();
+        }
+    }
+
+    private static class GradientPanel extends JPanel {
+        private final Color start;
+        private final Color end;
+        private final int arc;
+        private final boolean drawBorder;
+
+        private GradientPanel(Color start, Color end, int arc, boolean drawBorder) {
+            this.start = start;
+            this.end = end;
+            this.arc = arc;
+            this.drawBorder = drawBorder;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            GradientPaint gradient = new GradientPaint(0, 0, start, 0, getHeight(), end);
+            g2.setPaint(gradient);
+            if (arc > 0) {
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+            } else {
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+
+            if (drawBorder && arc > 0) {
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.setColor(new Color(255, 255, 255, 20));
+                g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, arc - 4, arc - 4);
+            }
+
+            g2.dispose();
+            super.paintComponent(g);
         }
     }
 }
