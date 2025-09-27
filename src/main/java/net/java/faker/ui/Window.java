@@ -153,9 +153,9 @@ public class Window extends JFrame {
         contentPane.setBorder(new EmptyBorder(12, 12, 12, 12));
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_AREA_ALIGNMENT, "center");
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_SHOW_TAB_SEPARATORS, true);
-        contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_ARC, 20);
+        contentPane.putClientProperty(resolveClientPropertyKey("TABBED_PANE_TAB_ARC", "JTabbedPane.tabArc"), 20);
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_HEIGHT, 48);
-        contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_SELECTION_HEIGHT, 4);
+        contentPane.putClientProperty(resolveClientPropertyKey("TABBED_PANE_TAB_SELECTION_HEIGHT", "JTabbedPane.tabSelectionHeight"), 4);
         contentPane.putClientProperty(FlatClientProperties.TABBED_PANE_HAS_FULL_BORDER, false);
         contentPane.setFont(contentPane.getFont().deriveFont(Font.BOLD, 15f));
         contentPane.setForeground(new Color(209, 218, 234));
@@ -369,6 +369,17 @@ public class Window extends JFrame {
 
     public static int showDialog(JPanel panel) {
         return JOptionPane.showConfirmDialog(null, panel, AppInfo.NAME, JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE);
+    }
+
+    private static Object resolveClientPropertyKey(String fieldName, Object fallback) {
+        try {
+            Object value = FlatClientProperties.class.getField(fieldName).get(null);
+            if (value != null) {
+                return value;
+            }
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+        }
+        return fallback;
     }
 
     private static class GlassPanel extends JPanel {
