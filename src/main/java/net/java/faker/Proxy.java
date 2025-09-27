@@ -24,6 +24,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import net.java.faker.auth.Account;
+import net.java.faker.cli.CommandBridge;
 import net.java.faker.proxy.client2proxy.Client2ProxyChannelInitializer;
 import net.java.faker.proxy.client2proxy.Client2ProxyHandler;
 import net.java.faker.proxy.event.ConnectEvent;
@@ -130,26 +131,34 @@ public class Proxy {
 
     public static void main(String[] args) {
         System.setProperty("file.encoding", "UTF-8");
+        boolean openRequested = false;
         if (args != null) {
             for (String arg : args) {
                 if ("--showdebug".equalsIgnoreCase(arg)) {
                     AdvancedTab.showDebug = true;
-                    break;
+                } else if ("open".equalsIgnoreCase(arg)) {
+                    openRequested = true;
                 }
             }
         }
 
+        if (openRequested && CommandBridge.sendOpenRequest()) {
+            return;
+        }
+
         Logger.setup();
         loadNetty();
-        config = new Config(new File(getFakerDirectory(), "faker_config.json"));
-        accountManager = new AccountManager(new File(getFakerDirectory(), "faker_accounts.json"));
+        File dataDirectory = getPhantomDirectoryFile();
+        config = new Config(AppInfo.resolveDataFile(dataDirectory, AppInfo.CONFIG_FILE, AppInfo.LEGACY_CONFIG_FILE));
+        accountManager = new AccountManager(AppInfo.resolveDataFile(dataDirectory, AppInfo.ACCOUNT_FILE, AppInfo.LEGACY_ACCOUNT_FILE));
 
         if (config.allowDirectConnection.get()) {
             Proxy.proxyAddress = new InetSocketAddress("0.0.0.0", 25565);
         } else {
             Proxy.proxyAddress = new InetSocketAddress("127.0.0.1", 25565);
         }
-        Window.getInstance();
+        Window window = Window.getInstance();
+        CommandBridge.start(window::reveal);
         registerEvents();
     }
 
@@ -182,6 +191,7 @@ public class Proxy {
                 kickAllClients(null);
 //                stopProxy();
             }
+            CommandBridge.stop();
         }));
     }
 
@@ -736,23 +746,44 @@ public class Proxy {
         }
     }
 
-    private static String fakerDirectory;
+    private static File dataDirectory;
 
-    public static String getFakerDirectory() {
-        if (fakerDirectory == null) {
+    private static File getPhantomDirectoryFile() {
+        if (dataDirectory == null) {
             File dir;
             if (Sys.isWindows()) {
                 String appdata = System.getenv("APPDATA");
                 if (appdata != null) {
-                    dir = new File(appdata, ".faker");
+                    dir = new File(appdata, ".phantom");
                 } else {
-                    dir = new File(System.getProperty("user.home"), ".faker");
+                    dir = new File(System.getProperty("user.home"), ".phantom");
                 }
             } else if (Sys.isMac()) {
-                dir = new File(System.getProperty("user.home") + "/Library/Application Support", "faker");
+                dir = new File(System.getProperty("user.home") + "/Library/Application Support", "Phantom");
             } else {
-                dir = new File(System.getProperty("user.home"), ".faker");
+                dir = new File(System.getProperty("user.home"), ".phantom");
             }
+
+            if (!dir.exists()) {
+                // Attempt to migrate from the legacy directory without removing the old data.
+                File legacyDir;
+                if (Sys.isWindows()) {
+                    String appdata = System.getenv("APPDATA");
+                    if (appdata != null) {
+                        legacyDir = new File(appdata, ".faker");
+                    } else {
+                        legacyDir = new File(System.getProperty("user.home"), ".faker");
+                    }
+                } else if (Sys.isMac()) {
+                    legacyDir = new File(System.getProperty("user.home") + "/Library/Application Support", "faker");
+                } else {
+                    legacyDir = new File(System.getProperty("user.home"), ".faker");
+                }
+                if (legacyDir.exists() && legacyDir.isDirectory()) {
+                    dir = legacyDir;
+                }
+            }
+
             if (!dir.exists() && !dir.mkdirs()) {
                 dir = null;
             } else if (dir.isFile()) {
@@ -761,8 +792,12 @@ public class Proxy {
             if (dir == null) {
                 dir = new File("").getParentFile();
             }
-            fakerDirectory = dir.getAbsolutePath();
+            dataDirectory = dir;
         }
-        return fakerDirectory;
+        return dataDirectory;
+    }
+
+    public static String getPhantomDirectory() {
+        return getPhantomDirectoryFile().getAbsolutePath();
     }
 }

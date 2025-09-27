@@ -18,19 +18,21 @@
 
 package net.java.faker.util;
 
+import net.java.faker.AppInfo;
 import net.java.faker.ui.Window;
-import net.java.faker.ui.tab.GeneralTab;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class Util {
 
     public static ImageIcon getResourceImageIcon(String path) {
-        URL url = GeneralTab.class.getResource(path);
+        URL url = locateResource(path);
         if (url == null) {
             return null;
         }
@@ -38,31 +40,57 @@ public class Util {
     }
 
     public static Image getResourceImage(String res) {
-        try {
-            return Toolkit.getDefaultToolkit().getImage(Window.class.getResource(res));
-        } catch (Exception ignored) {
+        URL url = locateResource(res);
+        if (url == null) {
             return null;
         }
+        return Toolkit.getDefaultToolkit().getImage(url);
     }
 
     public static byte[] getResourceBytes(String res) {
-        try {
-
-            InputStream is = Util.class.getResourceAsStream(res);
-            if (is == null) {
-                return null;
+        for (String candidate : candidatePaths(res)) {
+            try (InputStream is = Util.class.getResourceAsStream(candidate)) {
+                if (is == null) {
+                    continue;
+                }
+                byte[] arrBuffer = new byte[16384];
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(is.available());
+                int read;
+                while ((read = is.read(arrBuffer)) != -1) {
+                    baos.write(arrBuffer, 0, read);
+                }
+                return baos.toByteArray();
+            } catch (Exception ignored) {
             }
-            byte[] arrBuffer = new byte[16384];
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(is.available());
-
-            int read = 0;
-            while ((read = is.read(arrBuffer)) != -1) {
-                baos.write(arrBuffer, 0, read);
-            }
-            is.close();
-            return baos.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+        return null;
+    }
+
+    private static URL locateResource(String path) {
+        for (String candidate : candidatePaths(path)) {
+            URL url = Window.class.getResource(candidate);
+            if (url != null) {
+                return url;
+            }
+        }
+        return null;
+    }
+
+    private static String[] candidatePaths(String path) {
+        if (path == null || path.isEmpty()) {
+            return new String[0];
+        }
+        String normalized = path.startsWith("/") ? path : "/" + path;
+        Set<String> candidates = new LinkedHashSet<>();
+        candidates.add(normalized);
+        if (normalized.startsWith(AppInfo.LEGACY_RESOURCE_ROOT)) {
+            candidates.add(normalized.replace(AppInfo.LEGACY_RESOURCE_ROOT, AppInfo.RESOURCE_ROOT));
+        } else if (normalized.startsWith(AppInfo.RESOURCE_ROOT)) {
+            candidates.add(normalized.replace(AppInfo.RESOURCE_ROOT, AppInfo.LEGACY_RESOURCE_ROOT));
+        } else {
+            candidates.add(AppInfo.RESOURCE_ROOT + normalized);
+            candidates.add(AppInfo.LEGACY_RESOURCE_ROOT + normalized);
+        }
+        return candidates.toArray(new String[0]);
     }
 }

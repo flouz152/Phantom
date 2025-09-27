@@ -46,11 +46,11 @@ public class WinRedirect {
 
     private static boolean initNative() {
         if (Sys.isWindows() && Sys.isX64()) {
-            byte[] dllBytes = Util.getResourceBytes("/assets/faker/lib/win_redirect.dll");
+            byte[] dllBytes = Util.getResourceBytes(AppInfo.RESOURCE_ROOT + "/lib/win_redirect.dll");
             if (dllBytes == null) {
                 return false;
             }
-            File dllFile = new File(Proxy.getFakerDirectory(), "win_redirect.dll");
+            File dllFile = new File(Proxy.getPhantomDirectory(), "win_redirect.dll");
             if (!dllFile.exists() || dllFile.length() != dllBytes.length || !isEquals(dllFile, dllBytes)) {
                 try {
                     Files.write(dllFile.toPath(), dllBytes);
@@ -59,11 +59,11 @@ public class WinRedirect {
                 }
             }
 
-            byte[] driverBytes = Util.getResourceBytes("/assets/faker/lib/WinDivert64.sys");
+            byte[] driverBytes = Util.getResourceBytes(AppInfo.RESOURCE_ROOT + "/lib/WinDivert64.sys");
             if (driverBytes == null) {
                 return false;
             }
-            File driverFile = new File(Proxy.getFakerDirectory(), "WinDivert64.sys");
+            File driverFile = new File(Proxy.getPhantomDirectory(), "WinDivert64.sys");
             if (!driverFile.exists() || driverFile.length() != driverBytes.length) {
                 try {
                     Files.write(driverFile.toPath(), driverBytes);

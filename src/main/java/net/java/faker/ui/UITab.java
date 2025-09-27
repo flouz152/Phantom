@@ -35,6 +35,7 @@ public abstract class UITab {
         this.name = I18n.get(translationKey);
         this.contentPane = new JPanel();
 
+        this.contentPane.setOpaque(false);
         this.contentPane.setLayout(null);
         this.init(this.contentPane);
     }
