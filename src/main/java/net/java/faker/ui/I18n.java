@@ -18,6 +18,7 @@
 
 package net.java.faker.ui;
 
+import net.java.faker.AppInfo;
 import net.java.faker.Proxy;
 import net.java.faker.util.logging.Logger;
 
@@ -43,7 +44,10 @@ public class I18n {
 
     static {
         try {
-            Map<Path, byte[]> files = getFilesInDirectory("assets/faker/lang");
+            Map<Path, byte[]> files = getFilesInDirectory(AppInfo.RESOURCE_ROOT.substring(1) + "/lang");
+            if (files == null || files.isEmpty()) {
+                files = getFilesInDirectory(AppInfo.LEGACY_RESOURCE_ROOT.substring(1) + "/lang");
+            }
             if (files != null) {
                 for (Map.Entry<Path, byte[]> entry : files.entrySet()) {
                     final Properties properties = new Properties();
@@ -53,7 +57,10 @@ public class I18n {
             } else {
                 Logger.error("Can't find translation directory, try to load en_US...");
                 final Properties properties = new Properties();
-                InputStream is = I18n.class.getResourceAsStream("/assets/faker/lang/en_US.properties");
+                InputStream is = I18n.class.getResourceAsStream(AppInfo.RESOURCE_ROOT + "/lang/en_US.properties");
+                if (is == null) {
+                    is = I18n.class.getResourceAsStream(AppInfo.LEGACY_RESOURCE_ROOT + "/lang/en_US.properties");
+                }
                 if (is == null) {
                     throw new RuntimeException("Can't find any translations!");
                 }

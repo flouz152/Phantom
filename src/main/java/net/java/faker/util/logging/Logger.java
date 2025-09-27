@@ -19,6 +19,7 @@
 package net.java.faker.util.logging;
 
 import com.mojang.authlib.GameProfile;
+import net.java.faker.AppInfo;
 import net.java.faker.Proxy;
 import net.java.faker.proxy.session.ProxyConnection;
 import org.slf4j.LoggerFactory;
@@ -32,13 +33,16 @@ import java.util.Locale;
 
 public class Logger {
 
-    static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger("Faker");
+    static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AppInfo.NAME);
 
 
     public static final PrintStream SYSOUT = System.out;
     public static final PrintStream SYSERR = System.err;
-    private static LoggerFileStream out = new LoggerFileStream("STDOUT", SYSOUT, new File(Proxy.getFakerDirectory(), "std.log"));
-    private static LoggerFileStream err = new LoggerFileStream("STDERR", SYSERR, new File(Proxy.getFakerDirectory(), "err.log"));
+    private static final File DATA_DIRECTORY = new File(Proxy.getPhantomDirectory());
+    private static LoggerFileStream out = new LoggerFileStream("STDOUT", SYSOUT,
+            AppInfo.resolveDataFile(DATA_DIRECTORY, AppInfo.STDOUT_LOG, AppInfo.LEGACY_STDOUT_LOG));
+    private static LoggerFileStream err = new LoggerFileStream("STDERR", SYSERR,
+            AppInfo.resolveDataFile(DATA_DIRECTORY, AppInfo.STDERR_LOG, AppInfo.LEGACY_STDERR_LOG));
 
     public static void setup() {
         System.setErr(err);

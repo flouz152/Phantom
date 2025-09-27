@@ -18,6 +18,7 @@
 
 package net.java.faker.ui.tab;
 
+import net.java.faker.AppInfo;
 import net.java.faker.Proxy;
 import net.java.faker.WinRedirect;
 import net.java.faker.auth.Account;
@@ -57,9 +58,9 @@ public class GeneralTab extends UITab {
     static ImageIcon emptyIcon;
 
     static {
-        activeDeviceIcon = Util.getResourceImageIcon("/assets/faker/icon/computer_active.png");
-        inactiveDeviceIcon = Util.getResourceImageIcon("/assets/faker/icon/computer_gray.png");
-        swapIcon = Util.getResourceImageIcon("/assets/faker/icon/swap_32.png");
+        activeDeviceIcon = Util.getResourceImageIcon(AppInfo.RESOURCE_ROOT + "/icon/computer_active.png");
+        inactiveDeviceIcon = Util.getResourceImageIcon(AppInfo.RESOURCE_ROOT + "/icon/computer_gray.png");
+        swapIcon = Util.getResourceImageIcon(AppInfo.RESOURCE_ROOT + "/icon/swap_32.png");
         if (activeDeviceIcon != null) {
             emptyIcon = new ImageIcon(new BufferedImage(activeDeviceIcon.getIconWidth(), activeDeviceIcon.getIconHeight(), BufferedImage.TYPE_4BYTE_ABGR));
         }
@@ -100,6 +101,7 @@ public class GeneralTab extends UITab {
     @Override
     protected void init(JPanel contentPane) {
         JPanel top = new JPanel();
+        top.setOpaque(false);
         top.setLayout(new BorderLayout());
 
         contentPane.setLayout(new BorderLayout());
@@ -112,12 +114,13 @@ public class GeneralTab extends UITab {
 
     private void addHeader(final Container parent) {
         JPanel header = new JPanel();
+        header.setOpaque(false);
         header.setLayout(new GridBagLayout());
 
         LinkLabel discord = new LinkLabel("Discord", "https://discord.gg/vW6naJkMqJ");
         GBC.create(header).grid(0, 0).width(0).insets(BORDER_PADDING, BORDER_PADDING, 0, 0).anchor(GBC.NORTHWEST).add(discord);
 
-        JLabel title = new JLabel("Faker");
+        JLabel title = new JLabel(AppInfo.NAME);
         title.setFont(title.getFont().deriveFont(30F));
         GBC.create(header).grid(1, 0).weightx(1).width(0).insets(BORDER_PADDING, 0, 0, 0).anchor(GBC.CENTER).add(title);
         parent.add(header, BorderLayout.NORTH);
@@ -125,6 +128,7 @@ public class GeneralTab extends UITab {
 
     private void addBody(final Container parent) {
         JPanel body = new JPanel();
+        body.setOpaque(false);
         body.setLayout(new GridBagLayout());
 
         int gridy = 0;

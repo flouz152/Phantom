@@ -12,13 +12,13 @@ base {
 launch4j {
     manifest = "${project.projectDir}/manifest.xml"
     jarTask = project.tasks.shadowJar
-    outfile = 'faker-' + "${project.version}" + '.exe'
+    outfile = 'phantom-' + "${project.version}" + '.exe'
     headerType = 'gui'
-    productName = 'Faker'
-    mutexName = 'faker_mutex'
+    productName = 'Phantom'
+    mutexName = 'phantom_mutex'
     jreMinVersion = '17'
     version = "${project.version}"
-    icon = "${project.projectDir}/src/main/resources/assets/faker/icon/icon_64.ico"
+    icon = "${project.projectDir}/src/main/resources/assets/phantom/icon/icon_64.ico"
     jvmOptions.add("-Dfile.encoding=UTF-8")
     downloadUrl = "https://adoptium.net/"
 }
